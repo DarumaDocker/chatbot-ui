@@ -20,7 +20,7 @@ export const TemperatureSlider: FC<Props> = ({
   } = useContext(HomeContext);
   const lastConversation = conversations[conversations.length - 1];
   const [temperature, setTemperature] = useState(
-    lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
+    DEFAULT_TEMPERATURE,
   );
   const { t } = useTranslation('chat');
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
