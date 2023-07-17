@@ -9,6 +9,7 @@ import { SettingDialog } from '@/components/Settings/SettingDialog';
 
 import { Import } from '../../Settings/Import';
 import { Key } from '../../Settings/Key';
+import { ChatURL } from '../../Settings/ChatURL';
 import { SidebarButton } from '../../Sidebar/SidebarButton';
 import ChatbarContext from '../Chatbar.context';
 import { ClearConversations } from './ClearConversations';
@@ -21,6 +22,7 @@ export const ChatbarSettings = () => {
   const {
     state: {
       apiKey,
+      chatURL,
       lightMode,
       serverSideApiKeyIsSet,
       serverSidePluginKeysSet,
@@ -34,6 +36,7 @@ export const ChatbarSettings = () => {
     handleImportConversations,
     handleExportData,
     handleApiKeyChange,
+    handleChatURLChange,
   } = useContext(ChatbarContext);
 
   return (
@@ -56,9 +59,7 @@ export const ChatbarSettings = () => {
         onClick={() => setIsSettingDialog(true)}
       />
 
-      {!serverSideApiKeyIsSet ? (
-        <Key apiKey={apiKey} onApiKeyChange={handleApiKeyChange} />
-      ) : null}
+      <ChatURL chatURL={chatURL} onChatURLChange={handleChatURLChange} />
 
       {!serverSidePluginKeysSet ? <PluginKeys /> : null}
 

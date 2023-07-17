@@ -25,13 +25,9 @@ import { Plugin } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
-import Spinner from '../Spinner';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
-import { ModelSelect } from './ModelSelect';
-import { SystemPrompt } from './SystemPrompt';
-import { TemperatureSlider } from './Temperature';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
 
 interface Props {
@@ -45,14 +41,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     state: {
       selectedConversation,
       conversations,
-      models,
       apiKey,
+      chatURL,
       pluginKeys,
       serverSideApiKeyIsSet,
-      messageIsStreaming,
       modelError,
       loading,
-      prompts,
     },
     handleUpdateConversation,
     dispatch: homeDispatch,
@@ -94,27 +88,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         homeDispatch({ field: 'loading', value: true });
         homeDispatch({ field: 'messageIsStreaming', value: true });
         const chatBody: ChatBody = {
-          model: updatedConversation.model,
           messages: updatedConversation.messages,
-          key: apiKey,
-          prompt: updatedConversation.prompt,
-          temperature: updatedConversation.temperature,
+          url: chatURL,
         };
         const endpoint = getEndpoint(plugin);
-        let body;
-        if (!plugin) {
-          body = JSON.stringify(chatBody);
-        } else {
-          body = JSON.stringify({
-            ...chatBody,
-            googleAPIKey: pluginKeys
-              .find((key) => key.pluginId === 'google-search')
-              ?.requiredKeys.find((key) => key.key === 'GOOGLE_API_KEY')?.value,
-            googleCSEId: pluginKeys
-              .find((key) => key.pluginId === 'google-search')
-              ?.requiredKeys.find((key) => key.key === 'GOOGLE_CSE_ID')?.value,
-          });
-        }
         const controller = new AbortController();
         const response = await fetch(endpoint, {
           method: 'POST',
@@ -122,7 +99,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             'Content-Type': 'application/json',
           },
           signal: controller.signal,
-          body,
+          body: JSON.stringify(chatBody),
         });
         if (!response.ok) {
           homeDispatch({ field: 'loading', value: false });
@@ -349,40 +326,42 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   return (
     <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#343541]">
-      {!(apiKey || serverSideApiKeyIsSet) ? (
+      {!(chatURL || serverSideApiKeyIsSet) ? (
         <div className="mx-auto flex h-full w-[300px] flex-col justify-center space-y-6 sm:w-[600px]">
           <div className="text-center text-4xl font-bold text-black dark:text-white">
-            Welcome to Chatbot UI
+            Welcome to FlowsChat UI
           </div>
           <div className="text-center text-lg text-black dark:text-white">
-            <div className="mb-8">{`Chatbot UI is an open source clone of OpenAI's ChatGPT UI.`}</div>
-            <div className="mb-2 font-bold">
-              Important: Chatbot UI is 100% unaffiliated with OpenAI.
-            </div>
-          </div>
-          <div className="text-center text-gray-500 dark:text-gray-400">
-            <div className="mb-2">
-              Chatbot UI allows you to plug in your API key to use this UI with
-              their API.
-            </div>
-            <div className="mb-2">
-              It is <span className="italic">only</span> used to communicate
-              with their API.
-            </div>
-            <div className="mb-2">
-              {t(
-                'Please set your OpenAI API key in the bottom left of the sidebar.',
-              )}
-            </div>
-            <div>
-              {t("If you don't have an OpenAI API key, you can get one here: ")}
+            <div className="mb-8">
+              {`FlowsChat UI is an open source project forked from `}
               <a
-                href="https://platform.openai.com/account/api-keys"
+                href="https://github.com/mckaywrigley/chatbot-ui"
                 target="_blank"
                 rel="noreferrer"
                 className="text-blue-500 hover:underline"
               >
-                openai.com
+                Chatbot UI
+              </a>
+            </div>
+          </div>
+          <div className="text-center text-gray-500 dark:text-gray-400">
+            <div className="mb-2">
+              FlowsChat UI allows you to plug in your Chat URL to use this UI with Flows Lambda API.
+            </div>
+            <div className="mb-2">
+              {t(
+                'Please set your Chat URL in the bottom left of the sidebar.',
+              )}
+            </div>
+            <div>
+              {t("If you don't have an Flows Lambda API, you can get one here: ")}
+              <a
+                href="https://flows.network"
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-500 hover:underline"
+              >
+                flows.network
               </a>
             </div>
           </div>
@@ -400,54 +379,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               <>
                 <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]">
                   <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
-                    {models.length === 0 ? (
-                      <div>
-                        <Spinner size="16px" className="mx-auto" />
-                      </div>
-                    ) : (
-                      'Chatbot UI'
-                    )}
+                      FlowsChat UI
                   </div>
-
-                  {models.length > 0 && (
-                    <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
-                      <ModelSelect />
-
-                      <SystemPrompt
-                        conversation={selectedConversation}
-                        prompts={prompts}
-                        onChangePrompt={(prompt) =>
-                          handleUpdateConversation(selectedConversation, {
-                            key: 'prompt',
-                            value: prompt,
-                          })
-                        }
-                      />
-
-                      <TemperatureSlider
-                        label={t('Temperature')}
-                        onChangeTemperature={(temperature) =>
-                          handleUpdateConversation(selectedConversation, {
-                            key: 'temperature',
-                            value: temperature,
-                          })
-                        }
-                      />
-                    </div>
-                  )}
                 </div>
               </>
             ) : (
               <>
                 <div className="sticky top-0 z-10 flex justify-center border border-b-neutral-300 bg-neutral-100 py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200">
-                  {t('Model')}: {selectedConversation?.model.name} | {t('Temp')}
-                  : {selectedConversation?.temperature} |
-                  <button
-                    className="ml-2 cursor-pointer hover:opacity-50"
-                    onClick={handleSettings}
-                  >
-                    <IconSettings size={18} />
-                  </button>
                   <button
                     className="ml-2 cursor-pointer hover:opacity-50"
                     onClick={onClearAll}
@@ -455,13 +393,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     <IconClearAll size={18} />
                   </button>
                 </div>
-                {showSettings && (
-                  <div className="flex flex-col space-y-10 md:mx-auto md:max-w-xl md:gap-6 md:py-3 md:pt-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
-                    <div className="flex h-full flex-col space-y-4 border-b border-neutral-200 p-4 dark:border-neutral-600 md:rounded-lg md:border">
-                      <ModelSelect />
-                    </div>
-                  </div>
-                )}
 
                 {selectedConversation?.messages.map((message, index) => (
                   <MemoizedChatMessage

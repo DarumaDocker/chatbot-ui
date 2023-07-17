@@ -185,14 +185,7 @@ const Home = ({
       id: uuidv4(),
       name: t('New Conversation'),
       messages: [],
-      model: lastConversation?.model || {
-        id: OpenAIModels[defaultModelId].id,
-        name: OpenAIModels[defaultModelId].name,
-        maxLength: OpenAIModels[defaultModelId].maxLength,
-        tokenLimit: OpenAIModels[defaultModelId].tokenLimit,
-      },
       prompt: DEFAULT_SYSTEM_PROMPT,
-      temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
       folderId: null,
     };
 
@@ -269,6 +262,11 @@ const Home = ({
       dispatch({ field: 'apiKey', value: apiKey });
     }
 
+    const chatURL = localStorage.getItem('chatURL');
+    if (chatURL) {
+      dispatch({ field: 'chatURL', value: chatURL });
+    }
+
     const pluginKeys = localStorage.getItem('pluginKeys');
     if (serverSidePluginKeysSet) {
       dispatch({ field: 'pluginKeys', value: [] });
@@ -333,9 +331,7 @@ const Home = ({
           id: uuidv4(),
           name: t('New Conversation'),
           messages: [],
-          model: OpenAIModels[defaultModelId],
           prompt: DEFAULT_SYSTEM_PROMPT,
-          temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
           folderId: null,
         },
       });

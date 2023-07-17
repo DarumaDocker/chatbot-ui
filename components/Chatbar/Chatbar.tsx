@@ -55,6 +55,15 @@ export const Chatbar = () => {
     [homeDispatch],
   );
 
+  const handleChatURLChange = useCallback(
+    (chatURL: string) => {
+      homeDispatch({ field: 'chatURL', value: chatURL });
+
+      localStorage.setItem('chatURL', chatURL);
+    },
+    [homeDispatch],
+  );
+
   const handlePluginKeyChange = (pluginKey: PluginKey) => {
     if (pluginKeys.some((key) => key.pluginId === pluginKey.pluginId)) {
       const updatedPluginKeys = pluginKeys.map((key) => {
@@ -217,6 +226,7 @@ export const Chatbar = () => {
         handlePluginKeyChange,
         handleClearPluginKey,
         handleApiKeyChange,
+        handleChatURLChange,
       }}
     >
       <Sidebar<Conversation>
