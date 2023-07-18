@@ -45,12 +45,14 @@ interface Props {
   serverSideApiKeyIsSet: boolean;
   serverSidePluginKeysSet: boolean;
   defaultModelId: OpenAIModelID;
+  chatURL: string;
 }
 
 const Home = ({
   serverSideApiKeyIsSet,
   serverSidePluginKeysSet,
   defaultModelId,
+  chatURL,
 }: Props) => {
   const { t } = useTranslation('chat');
   const { getModels } = useApiService();
@@ -69,7 +71,6 @@ const Home = ({
       conversations,
       selectedConversation,
       prompts,
-      temperature,
     },
     dispatch,
   } = contextValue;
@@ -239,7 +240,12 @@ const Home = ({
         field: 'serverSidePluginKeysSet',
         value: serverSidePluginKeysSet,
       });
-  }, [defaultModelId, serverSideApiKeyIsSet, serverSidePluginKeysSet]);
+    chatURL &&
+      dispatch({
+        field: 'chatURL',
+        value: chatURL,
+      });
+  }, [defaultModelId, chatURL, serverSideApiKeyIsSet, serverSidePluginKeysSet]);
 
   // ON LOAD --------------------------------------------
 
@@ -262,9 +268,13 @@ const Home = ({
       dispatch({ field: 'apiKey', value: apiKey });
     }
 
-    const chatURL = localStorage.getItem('chatURL');
     if (chatURL) {
-      dispatch({ field: 'chatURL', value: chatURL });
+      localStorage.setItem('chatURL', chatURL);
+    } else {
+      const chatURL = localStorage.getItem('chatURL');
+      if (chatURL) {
+        dispatch({ field: 'chatURL', value: chatURL });
+      }
     }
 
     const pluginKeys = localStorage.getItem('pluginKeys');
@@ -338,6 +348,7 @@ const Home = ({
     }
   }, [
     defaultModelId,
+    chatURL,
     dispatch,
     serverSideApiKeyIsSet,
     serverSidePluginKeysSet,
@@ -391,19 +402,15 @@ const Home = ({
 };
 export default Home;
 
-export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
-  const defaultModelId =
-    (process.env.DEFAULT_MODEL &&
-      Object.values(OpenAIModelID).includes(
-        process.env.DEFAULT_MODEL as OpenAIModelID,
-      ) &&
-      process.env.DEFAULT_MODEL) ||
-    fallbackModelID;
+export const getServerSideProps: GetServerSideProps = async ({ locale, query }) => {
+  let chatURL = query['chat_url'] || '';
+  if (Array.isArray(chatURL)) {
+    chatURL = chatURL[0];
+  }
 
   return {
     props: {
-      serverSideApiKeyIsSet: !!process.env.OPENAI_API_KEY,
-      defaultModelId,
+      chatURL,
       ...(await serverSideTranslations(locale ?? 'en', [
         'common',
         'chat',
