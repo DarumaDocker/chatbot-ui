@@ -8,11 +8,11 @@ export const config = {
 
 const handler = async (req: Request): Promise<Response> => {
   try {
-    const { messages, url } = (await req.json()) as ChatBody;
+    const { messages, url, conversationName } = (await req.json()) as ChatBody;
 
     let messageToSend = messages[messages.length - 1].content;
 
-    const resp = await Lambda(url, messageToSend);
+    const resp = await Lambda(url, messageToSend, conversationName);
 
     return new Response(resp);
   } catch (error) {

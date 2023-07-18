@@ -89,6 +89,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         homeDispatch({ field: 'messageIsStreaming', value: true });
         const chatBody: ChatBody = {
           messages: updatedConversation.messages,
+          conversationName: updatedConversation.name,
           url: chatURL,
         };
         const endpoint = getEndpoint(plugin);

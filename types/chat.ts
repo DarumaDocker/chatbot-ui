@@ -8,6 +8,7 @@ export type Role = 'assistant' | 'user';
 export interface ChatBody {
   messages: Message[];
   url: string;
+  conversationName: string,
 }
 
 export interface Conversation {
