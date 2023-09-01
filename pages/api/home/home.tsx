@@ -46,6 +46,8 @@ interface Props {
   serverSidePluginKeysSet: boolean;
   defaultModelId: OpenAIModelID;
   chatURL: string;
+  siteTitle: string;
+  siteDesc: string;
 }
 
 const Home = ({
@@ -53,6 +55,8 @@ const Home = ({
   serverSidePluginKeysSet,
   defaultModelId,
   chatURL,
+  siteTitle,
+  siteDesc,
 }: Props) => {
   const { t } = useTranslation('chat');
   const { getModels } = useApiService();
@@ -367,8 +371,8 @@ const Home = ({
       }}
     >
       <Head>
-        <title>Chatbot UI</title>
-        <meta name="description" content="ChatGPT but better." />
+        <title>{siteTitle}</title>
+        <meta name="description" content={siteDesc} />
         <meta
           name="viewport"
           content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no"
@@ -402,13 +406,17 @@ const Home = ({
 export default Home;
 
 export const getServerSideProps: GetServerSideProps = async ({ locale, query }) => {
-  let chatURL = query['chat_url'] || '';
+  const siteTitle = process.env.SITE_TITLE || 'Chatbot UI';
+  const siteDesc = process.env.SITE_DESC || 'ChatGPT but better.';
+  let chatURL = query['chat_url'] || process.env.CHAT_URL || '';
   if (Array.isArray(chatURL)) {
     chatURL = chatURL[0];
   }
 
   return {
     props: {
+      siteTitle,
+      siteDesc,
       chatURL,
       ...(await serverSideTranslations(locale ?? 'en', [
         'common',
