@@ -25,7 +25,7 @@ That's it!
 
 ## Deploy your own front end UI
 
-You can fork the project, customize it with your own title and text, and then deploy it on Vercel for free.
+You can fork the project, customize the title, description and default webhook URL by environment variables, and then deploy it on Vercel for free.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fflows-network%2Fchatbot-ui)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fflows-network%2Fchatbot-ui&env=SITE_TITLE,SITE_DESC,CHAT_URL)
 
