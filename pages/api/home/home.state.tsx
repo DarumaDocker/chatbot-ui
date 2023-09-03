@@ -8,6 +8,8 @@ import { Prompt } from '@/types/prompt';
 export interface HomeInitialState {
   apiKey: string;
   chatURL: string;
+  siteTitle: string;
+  siteDesc: string;
   pluginKeys: PluginKey[];
   loading: boolean;
   lightMode: 'light' | 'dark';
@@ -34,6 +36,8 @@ export interface HomeInitialState {
 export const initialState: HomeInitialState = {
   apiKey: '',
   chatURL: '',
+  siteTitle: '',
+  siteDesc: '',
   loading: false,
   pluginKeys: [],
   lightMode: 'dark',

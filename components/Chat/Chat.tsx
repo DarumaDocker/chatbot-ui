@@ -43,6 +43,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       conversations,
       apiKey,
       chatURL,
+      siteTitle,
+      siteDesc,
       pluginKeys,
       serverSideApiKeyIsSet,
       modelError,
@@ -331,24 +333,15 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       {!(chatURL || serverSideApiKeyIsSet) ? (
         <div className="mx-auto flex h-full w-[300px] flex-col justify-center space-y-6 sm:w-[600px]">
           <div className="text-center text-4xl font-bold text-black dark:text-white">
-            Welcome to FlowsChat UI
+            Welcome to {siteTitle}
           </div>
           <div className="text-center text-lg text-black dark:text-white">
-            <div className="mb-8">
-              {`FlowsChat UI is an open source project forked from `}
-              <a
-                href="https://github.com/mckaywrigley/chatbot-ui"
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                Chatbot UI
-              </a>
+            <div className="mb-8" dangerouslySetInnerHTML={{__html: siteDesc}}>
             </div>
           </div>
           <div className="text-center text-gray-500 dark:text-gray-400">
             <div className="mb-2">
-              FlowsChat UI allows you to plug in your Chat URL to use this UI with Flows Lambda API.
+              {siteTitle} allows you to plug in your Chat URL to use this UI with Flows Lambda API.
             </div>
             <div className="mb-2">
               {t(
@@ -381,7 +374,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               <>
                 <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]">
                   <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
-                      FlowsChat UI
+                      {siteTitle}
                   </div>
                 </div>
               </>

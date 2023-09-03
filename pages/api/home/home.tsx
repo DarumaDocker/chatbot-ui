@@ -249,7 +249,18 @@ const Home = ({
         field: 'chatURL',
         value: chatURL,
       });
-  }, [defaultModelId, chatURL, serverSideApiKeyIsSet, serverSidePluginKeysSet]);
+
+    siteTitle &&
+      dispatch({
+        field: 'siteTitle',
+        value: siteTitle,
+      });
+    siteDesc &&
+      dispatch({
+        field: 'siteDesc',
+        value: siteDesc,
+      });
+  }, [defaultModelId, chatURL, siteTitle, siteDesc, serverSideApiKeyIsSet, serverSidePluginKeysSet]);
 
   // ON LOAD --------------------------------------------
 
@@ -406,8 +417,16 @@ const Home = ({
 export default Home;
 
 export const getServerSideProps: GetServerSideProps = async ({ locale, query }) => {
-  const siteTitle = process.env.SITE_TITLE || 'Chatbot UI';
-  const siteDesc = process.env.SITE_DESC || 'ChatGPT but better.';
+  const siteTitle = process.env.SITE_TITLE || 'FlowsChat UI';
+  const siteDesc = process.env.SITE_DESC || `
+    This is an open source project forked from
+    <a href="https://github.com/mckaywrigley/chatbot-ui"
+      target="_blank"
+      rel="noreferrer"
+      class="text-blue-500 hover:underline"
+    >
+      Chatbot UI
+    </a>`;
   let chatURL = query['chat_url'] || process.env.CHAT_URL || '';
   if (Array.isArray(chatURL)) {
     chatURL = chatURL[0];
