@@ -29,3 +29,10 @@ You can fork the project, customize the title, description and default webhook U
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fflows-network%2Fchatbot-ui&env=SITE_TITLE,SITE_DESC,CHAT_URL)
 
+Environment variable | value                                  |
+-------------------- | -------------------------------------- |
+SITE_TITLE           | Title of the deployed chatbot UI       |
+SITE_DESC            | Description to display on the UI       |
+CHAT_URL             | The webhook URL from the flow function |
+
+
