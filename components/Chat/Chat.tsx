@@ -96,8 +96,15 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             content.length > 30 ? content.substring(0, 30) + '...' : content;
           updatedConversation = {
             ...updatedConversation,
-            name: customName,
+            // name: customName,
           };
+          if (updatedConversation.name === t('New Conversation')) {
+            updatedConversation.name = customName;
+            handleUpdateConversation(updatedConversation, {
+              key: 'name',
+              value: customName,
+            });
+          }
         }
         const chatBody: ChatBody = {
           messages: updatedConversation.messages,
