@@ -20,3 +20,16 @@ export const updatePrompt = (updatedPrompt: Prompt, allPrompts: Prompt[]) => {
 export const savePrompts = (prompts: Prompt[]) => {
   localStorage.setItem('prompts', JSON.stringify(prompts));
 };
+
+export const getPrompts = () => {
+  let prompts: Prompt[] = JSON.parse(localStorage.getItem('prompts') || '[]');
+  return prompts;
+}
+
+export const saveShowPromptbar = (showPromptbar: boolean) => {
+  localStorage.setItem('showPromptbar', JSON.stringify(!showPromptbar));
+}
+
+export const getShowPromptbar = () => {
+  return localStorage.getItem('showPromptbar') === 'true';
+}

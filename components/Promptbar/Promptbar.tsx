@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 
-import { savePrompts } from '@/utils/app/prompts';
+import { savePrompts, saveShowPromptbar } from '@/utils/app/prompts';
 
 import { OpenAIModels } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
@@ -39,11 +39,13 @@ const Promptbar = () => {
   } = promptBarContextValue;
 
   const handleTogglePromptbar = () => {
+    console.log("handleTogglePromptbar")
     homeDispatch({ field: 'showPromptbar', value: !showPromptbar });
-    localStorage.setItem('showPromptbar', JSON.stringify(!showPromptbar));
+    saveShowPromptbar(!showPromptbar)
   };
 
   const handleCreatePrompt = () => {
+    console.log("handleCreatePrompt");
     if (defaultModelId) {
       const newPrompt: Prompt = {
         id: uuidv4(),

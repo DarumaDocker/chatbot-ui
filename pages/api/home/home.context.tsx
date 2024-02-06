@@ -6,7 +6,7 @@ import { Conversation } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
 import { FolderType } from '@/types/folder';
 
-import { HomeInitialState } from './home.state';
+import { HomeInitialState, initialState } from './home.state';
 
 export interface HomeContextProps {
   state: HomeInitialState;
@@ -22,6 +22,29 @@ export interface HomeContextProps {
   ) => void;
 }
 
-const HomeContext = createContext<HomeContextProps>(undefined!);
+const HomeContext = createContext<HomeContextProps>({
+  state: initialState,
+  dispatch: function (value: ActionType<HomeInitialState>): void {
+    throw new Error('Function not implemented.');
+  },
+  handleNewConversation: function (): void {
+    throw new Error('Function not implemented.');
+  },
+  handleCreateFolder: function (name: string, type: FolderType): void {
+    throw new Error('Function not implemented.');
+  },
+  handleDeleteFolder: function (folderId: string): void {
+    throw new Error('Function not implemented.');
+  },
+  handleUpdateFolder: function (folderId: string, name: string): void {
+    throw new Error('Function not implemented.');
+  },
+  handleSelectConversation: function (conversation: Conversation): void {
+    throw new Error('Function not implemented.');
+  },
+  handleUpdateConversation: function (conversation: Conversation, data: KeyValuePair): void {
+    throw new Error('Function not implemented.');
+  }
+});
 
 export default HomeContext;

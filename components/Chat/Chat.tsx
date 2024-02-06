@@ -25,10 +25,15 @@ import { Plugin } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import { sendChatBody } from '@/utils/app/backend'
+
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
+
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -41,12 +46,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     state: {
       selectedConversation,
       conversations,
-      apiKey,
-      chatURL,
       siteTitle,
       siteDesc,
-      pluginKeys,
-      serverSideApiKeyIsSet,
       modelError,
       loading,
     },
@@ -109,34 +110,21 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const chatBody: ChatBody = {
           messages: updatedConversation.messages,
           conversationName: updatedConversation.name,
-          url: chatURL,
+          url: '',
         };
-        const endpoint = getEndpoint(plugin);
+
         const controller = new AbortController();
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          signal: controller.signal,
-          body: JSON.stringify(chatBody),
-        });
-        if (!response.ok) {
-          homeDispatch({ field: 'loading', value: false });
-          homeDispatch({ field: 'messageIsStreaming', value: false });
-          toast.error(response.statusText);
-          return;
-        }
-        const data = response.body;
+        const data = await sendChatBody(chatBody);
+
         if (!data) {
           homeDispatch({ field: 'loading', value: false });
           homeDispatch({ field: 'messageIsStreaming', value: false });
           return;
         }
-        if (!plugin) {
+
+        {
           homeDispatch({ field: 'loading', value: false });
           const reader = data.getReader();
-          const decoder = new TextDecoder();
           let done = false;
           let isFirst = true;
           let text = '';
@@ -148,7 +136,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             }
             const { value, done: doneReading } = await reader.read();
             done = doneReading;
-            const chunkValue = decoder.decode(value);
+            const chunkValue = value || '';
             text += chunkValue;
             if (isFirst) {
               isFirst = false;
@@ -200,43 +188,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           homeDispatch({ field: 'conversations', value: updatedConversations });
           saveConversations(updatedConversations);
           homeDispatch({ field: 'messageIsStreaming', value: false });
-        } else {
-          const { answer } = await response.json();
-          const updatedMessages: Message[] = [
-            ...updatedConversation.messages,
-            { role: 'assistant', content: answer },
-          ];
-          updatedConversation = {
-            ...updatedConversation,
-            messages: updatedMessages,
-          };
-          homeDispatch({
-            field: 'selectedConversation',
-            value: updateConversation,
-          });
-          saveConversation(updatedConversation);
-          const updatedConversations: Conversation[] = conversations.map(
-            (conversation) => {
-              if (conversation.id === selectedConversation.id) {
-                return updatedConversation;
-              }
-              return conversation;
-            },
-          );
-          if (updatedConversations.length === 0) {
-            updatedConversations.push(updatedConversation);
-          }
-          homeDispatch({ field: 'conversations', value: updatedConversations });
-          saveConversations(updatedConversations);
-          homeDispatch({ field: 'loading', value: false });
-          homeDispatch({ field: 'messageIsStreaming', value: false });
         }
       }
     },
     [
-      apiKey,
       conversations,
-      pluginKeys,
       selectedConversation,
       stopConversationRef,
     ],
@@ -277,15 +233,22 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   };
 
   const onClearAll = () => {
-    if (
-      confirm(t<string>('Are you sure you want to clear all messages?')) &&
-      selectedConversation
-    ) {
-      handleUpdateConversation(selectedConversation, {
-        key: 'messages',
-        value: [],
-      });
-    }
+    confirmAlert({
+      message: "Are you sure you want to clear all messages?",
+      buttons: [
+        {
+          label: 'Yes', onClick: () => {
+            if (selectedConversation) {
+              handleUpdateConversation(selectedConversation, {
+                key: 'messages',
+                value: [],
+              });
+            }
+          }
+        },
+        { label: 'No' }
+      ]
+    });
   };
 
   const scrollDown = () => {
@@ -337,40 +300,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   return (
     <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#343541]">
-      {!(chatURL || serverSideApiKeyIsSet) ? (
-        <div className="mx-auto flex h-full w-[300px] flex-col justify-center space-y-6 sm:w-[600px]">
-          <div className="text-center text-4xl font-bold text-black dark:text-white">
-            Welcome to {siteTitle}
-          </div>
-          <div className="text-center text-lg text-black dark:text-white">
-            <div className="mb-8" dangerouslySetInnerHTML={{ __html: siteDesc }}>
-            </div>
-          </div>
-          <div className="text-center text-gray-500 dark:text-gray-400">
-            <div className="mb-2">
-              {siteTitle} allows you to plug in your Chat URL to use this UI with Flows Lambda API.
-            </div>
-            <div className="mb-2">
-              {t(
-                'Please set your Chat URL in the bottom left of the sidebar.',
-              )}
-            </div>
-            <div>
-              {t("If you don't have an Flows Lambda API, you can get one here: ")}
-              <a
-                href="https://flows.network"
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                flows.network
-              </a>
-            </div>
-          </div>
-        </div>
-      ) : modelError ? (
-        <ErrorMessageDiv error={modelError} />
-      ) : (
+      {
         <>
           <div
             className="max-h-full overflow-x-hidden"
@@ -438,8 +368,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             showScrollDownButton={showScrollDownButton}
           />
         </>
-      )}
+      }
     </div>
   );
+
 });
 Chat.displayName = 'Chat';

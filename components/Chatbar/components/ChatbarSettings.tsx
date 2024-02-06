@@ -21,11 +21,7 @@ export const ChatbarSettings = () => {
 
   const {
     state: {
-      apiKey,
-      chatURL,
       lightMode,
-      serverSideApiKeyIsSet,
-      serverSidePluginKeysSet,
       conversations,
     },
     dispatch: homeDispatch,
@@ -35,8 +31,6 @@ export const ChatbarSettings = () => {
     handleClearConversations,
     handleImportConversations,
     handleExportData,
-    handleApiKeyChange,
-    handleChatURLChange,
   } = useContext(ChatbarContext);
 
   return (
@@ -50,10 +44,6 @@ export const ChatbarSettings = () => {
         icon={<IconSettings size={18} />}
         onClick={() => setIsSettingDialog(true)}
       />
-
-      <ChatURL chatURL={chatURL} onChatURLChange={handleChatURLChange} />
-
-      {!serverSidePluginKeysSet ? <PluginKeys /> : null}
 
       <SettingDialog
         open={isSettingDialogOpen}

@@ -6,11 +6,8 @@ import { PluginKey } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
 
 export interface HomeInitialState {
-  apiKey: string;
-  chatURL: string;
   siteTitle: string;
   siteDesc: string;
-  pluginKeys: PluginKey[];
   loading: boolean;
   lightMode: 'light' | 'dark';
   messageIsStreaming: boolean;
@@ -28,18 +25,12 @@ export interface HomeInitialState {
   messageError: boolean;
   searchTerm: string;
   defaultModelId: OpenAIModelID | undefined;
-  serverSideApiKeyIsSet: boolean;
-  serverSideChatURLIsSet: boolean;
-  serverSidePluginKeysSet: boolean;
 }
 
 export const initialState: HomeInitialState = {
-  apiKey: '',
-  chatURL: '',
   siteTitle: '',
   siteDesc: '',
   loading: false,
-  pluginKeys: [],
   lightMode: 'dark',
   messageIsStreaming: false,
   modelError: null,
@@ -55,8 +46,5 @@ export const initialState: HomeInitialState = {
   currentFolder: undefined,
   messageError: false,
   searchTerm: '',
-  defaultModelId: undefined,
-  serverSideApiKeyIsSet: false,
-  serverSideChatURLIsSet: false,
-  serverSidePluginKeysSet: true,
+  defaultModelId: OpenAIModelID.GPT_3_5,
 };

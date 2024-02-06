@@ -16,12 +16,15 @@ import {
 } from '@/utils/app/clean';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import {
+  getConversations,
+  getSelectedConversation,
+  getShowChatbar,
   saveConversation,
   saveConversations,
   updateConversation,
 } from '@/utils/app/conversation';
-import { saveFolders } from '@/utils/app/folders';
-import { savePrompts } from '@/utils/app/prompts';
+import { getFolders, saveFolders } from '@/utils/app/folders';
+import { getPrompts, getShowPromptbar, savePrompts } from '@/utils/app/prompts';
 import { getSettings } from '@/utils/app/settings';
 
 import { Conversation } from '@/types/chat';
@@ -68,7 +71,6 @@ const Home = ({
 
   const {
     state: {
-      apiKey,
       lightMode,
       folders,
       conversations,
@@ -210,21 +212,6 @@ const Home = ({
   useEffect(() => {
     defaultModelId &&
       dispatch({ field: 'defaultModelId', value: defaultModelId });
-    serverSideApiKeyIsSet &&
-      dispatch({
-        field: 'serverSideApiKeyIsSet',
-        value: serverSideApiKeyIsSet,
-      });
-    serverSidePluginKeysSet &&
-      dispatch({
-        field: 'serverSidePluginKeysSet',
-        value: serverSidePluginKeysSet,
-      });
-    chatURL &&
-      dispatch({
-        field: 'chatURL',
-        value: chatURL,
-      });
 
     siteTitle &&
       dispatch({
@@ -249,75 +236,40 @@ const Home = ({
       });
     }
 
-    const apiKey = localStorage.getItem('apiKey');
-
-    if (serverSideApiKeyIsSet) {
-      dispatch({ field: 'apiKey', value: '' });
-
-      localStorage.removeItem('apiKey');
-    } else if (apiKey) {
-      dispatch({ field: 'apiKey', value: apiKey });
-    }
-
-    if (chatURL) {
-      localStorage.setItem('chatURL', chatURL);
-    } else {
-      const chatURL = localStorage.getItem('chatURL');
-      if (chatURL) {
-        dispatch({ field: 'chatURL', value: chatURL });
-      }
-    }
-
-    const pluginKeys = localStorage.getItem('pluginKeys');
-    if (serverSidePluginKeysSet) {
-      dispatch({ field: 'pluginKeys', value: [] });
-      localStorage.removeItem('pluginKeys');
-    } else if (pluginKeys) {
-      dispatch({ field: 'pluginKeys', value: pluginKeys });
-    }
-
     if (window.innerWidth < 640) {
       dispatch({ field: 'showChatbar', value: false });
       dispatch({ field: 'showPromptbar', value: false });
     }
 
-    const showChatbar = localStorage.getItem('showChatbar');
-    if (showChatbar) {
-      dispatch({ field: 'showChatbar', value: showChatbar === 'true' });
+    const showChatbar = getShowChatbar();
+    dispatch({ field: 'showChatbar', value: showChatbar });
+
+    const showPromptbar = getShowPromptbar();
+    dispatch({ field: 'showPromptbar', value: showPromptbar });
+
+
+    const folders = getFolders();
+    if (folders.length > 0) {
+      dispatch({ field: 'folders', value: folders });
     }
 
-    const showPromptbar = localStorage.getItem('showPromptbar');
-    if (showPromptbar) {
-      dispatch({ field: 'showPromptbar', value: showPromptbar === 'true' });
-    }
-
-    const folders = localStorage.getItem('folders');
-    if (folders) {
-      dispatch({ field: 'folders', value: JSON.parse(folders) });
-    }
-
-    const prompts = localStorage.getItem('prompts');
+    const prompts = getPrompts();
     if (prompts) {
-      dispatch({ field: 'prompts', value: JSON.parse(prompts) });
+      dispatch({ field: 'prompts', value: prompts });
     }
 
-    const conversationHistory = localStorage.getItem('conversationHistory');
-    if (conversationHistory) {
-      const parsedConversationHistory: Conversation[] =
-        JSON.parse(conversationHistory);
+    const conversationHistory = getConversations();
+    if (conversationHistory.length > 0) {
       const cleanedConversationHistory = cleanConversationHistory(
-        parsedConversationHistory,
+        conversationHistory,
       );
-
       dispatch({ field: 'conversations', value: cleanedConversationHistory });
     }
 
-    const selectedConversation = localStorage.getItem('selectedConversation');
+    const selectedConversation = getSelectedConversation();
     if (selectedConversation) {
-      const parsedSelectedConversation: Conversation =
-        JSON.parse(selectedConversation);
       const cleanedSelectedConversation = cleanSelectedConversation(
-        parsedSelectedConversation,
+        selectedConversation,
       );
 
       dispatch({
@@ -384,6 +336,7 @@ const Home = ({
               <Chat stopConversationRef={stopConversationRef} />
             </div>
 
+            <Promptbar />
           </div>
         </main>
       )}
