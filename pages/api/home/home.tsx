@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from 'react-query';
 
-import { GetServerSideProps } from 'next';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
@@ -80,29 +79,6 @@ const Home = ({
   } = contextValue;
 
   const stopConversationRef = useRef<boolean>(false);
-
-  const { data, error, refetch } = useQuery(
-    ['GetModels', apiKey, serverSideApiKeyIsSet],
-    ({ signal }) => {
-      if (!apiKey && !serverSideApiKeyIsSet) return null;
-
-      return getModels(
-        {
-          key: apiKey,
-        },
-        signal,
-      );
-    },
-    { enabled: true, refetchOnMount: false },
-  );
-
-  useEffect(() => {
-    if (data) dispatch({ field: 'models', value: data });
-  }, [data, dispatch]);
-
-  useEffect(() => {
-    dispatch({ field: 'modelError', value: getModelsError(error) });
-  }, [dispatch, error, getModelsError]);
 
   // FETCH MODELS ----------------------------------------------
 
@@ -415,36 +391,3 @@ const Home = ({
   );
 };
 export default Home;
-
-export const getServerSideProps: GetServerSideProps = async ({ locale, query }) => {
-  const siteTitle = process.env.SITE_TITLE || 'FlowsChat UI';
-  const siteDesc = process.env.SITE_DESC || `
-    This is an open source project forked from
-    <a href="https://github.com/mckaywrigley/chatbot-ui"
-      target="_blank"
-      rel="noreferrer"
-      class="text-blue-500 hover:underline"
-    >
-      Chatbot UI
-    </a>`;
-  let chatURL = query['chat_url'] || process.env.CHAT_URL || '';
-  if (Array.isArray(chatURL)) {
-    chatURL = chatURL[0];
-  }
-
-  return {
-    props: {
-      siteTitle,
-      siteDesc,
-      chatURL,
-      ...(await serverSideTranslations(locale ?? 'en', [
-        'common',
-        'chat',
-        'sidebar',
-        'markdown',
-        'promptbar',
-        'settings',
-      ])),
-    },
-  };
-};

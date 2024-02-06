@@ -343,7 +343,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             Welcome to {siteTitle}
           </div>
           <div className="text-center text-lg text-black dark:text-white">
-            <div className="mb-8" dangerouslySetInnerHTML={{__html: siteDesc}}>
+            <div className="mb-8" dangerouslySetInnerHTML={{ __html: siteDesc }}>
             </div>
           </div>
           <div className="text-center text-gray-500 dark:text-gray-400">
@@ -381,7 +381,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               <>
                 <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]">
                   <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
-                      {siteTitle}
+                    {siteTitle}
                   </div>
                 </div>
               </>
