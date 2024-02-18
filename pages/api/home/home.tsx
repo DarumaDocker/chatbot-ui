@@ -312,6 +312,7 @@ const Home = ({
       <Head>
         <title>{siteTitle}</title>
         <meta name="description" content={siteDesc} />
+        <meta charSet="UTF-8" />
         <meta
           name="viewport"
           content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no"
