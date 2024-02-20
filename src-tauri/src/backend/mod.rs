@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+pub mod wasm_backend;
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Role {
     #[serde(rename = "system")]
@@ -24,23 +26,18 @@ pub struct ChatBody {
 }
 
 pub trait Backend {
-    fn handler(&self, chatbody: ChatBody) -> tokio::sync::mpsc::UnboundedReceiver<String>;
+    fn handler(&self, chatbody: ChatBody, tx: std::sync::mpsc::Sender<String>);
 }
 
 pub struct EchoBackend;
 
 impl Backend for EchoBackend {
-    fn handler(&self, chatbody: ChatBody) -> tokio::sync::mpsc::UnboundedReceiver<String> {
-        let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
-        tokio::spawn(async move {
-            let message = chatbody.messages.last();
-            if let Some(message) = message {
-                for s in message.content.chars() {
-                    let _ = tx.send(s.to_string());
-                    tokio::time::sleep(std::time::Duration::from_millis(300)).await;
-                }
+    fn handler(&self, chatbody: ChatBody, tx: std::sync::mpsc::Sender<String>) {
+        let message = chatbody.messages.last();
+        if let Some(message) = message {
+            for s in message.content.chars() {
+                let _ = tx.send(s.to_string());
             }
-        });
-        rx
+        }
     }
 }
