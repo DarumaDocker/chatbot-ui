@@ -21,23 +21,55 @@ pub struct Message {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ChatBody {
     pub messages: Vec<Message>,
-    #[serde(rename = "conversationName")]
-    pub conversation_name: String,
+    pub channel_id: String,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct Options {
+    pub ctx_size: Option<u64>,
+    pub n_predict: Option<u64>,
+    pub n_gpu_layers: Option<u64>,
+    pub batch_size: Option<u64>,
+    pub temp: Option<f32>,
+    pub repeat_penalty: Option<f32>,
+    pub reverse_prompt: Option<String>,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct LoadModel {
+    pub model: String,
+    #[serde(default)]
+    pub prompt_template: Option<String>,
+    #[serde(default)]
+    pub options: Options,
+}
+
+#[derive(Debug)]
+pub enum TokenError {
+    BackendNotRun,
+    EndOfSequence,
+    ContextFull,
+    PromptTooLong,
+    TooLarge,
+    InvalidEncoding,
+    Other,
+}
+
+pub struct Token {
+    pub content: String,
+}
+
+pub type ListModelRespone = crossbeam::channel::Sender<Vec<String>>;
+pub type LoadModelRespone = crossbeam::channel::Sender<()>;
+pub type ChatRespone = crossbeam::channel::Sender<Result<Token, TokenError>>;
+
+#[derive(Debug)]
+pub enum Request {
+    ListModel(ListModelRespone),
+    LoadModel(LoadModel, LoadModelRespone),
+    Chat(ChatBody, ChatRespone),
 }
 
 pub trait Backend {
-    fn handler(&self, chatbody: ChatBody, tx: std::sync::mpsc::Sender<String>);
-}
-
-pub struct EchoBackend;
-
-impl Backend for EchoBackend {
-    fn handler(&self, chatbody: ChatBody, tx: std::sync::mpsc::Sender<String>) {
-        let message = chatbody.messages.last();
-        if let Some(message) = message {
-            for s in message.content.chars() {
-                let _ = tx.send(s.to_string());
-            }
-        }
-    }
+    fn request(&self, req: Request);
 }

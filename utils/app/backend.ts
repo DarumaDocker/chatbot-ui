@@ -21,7 +21,10 @@ export async function sendChatBody(chatbody: ChatBody): Promise<ReadableStream<s
         });
 
         invoke("send_chat_body", {
-            chatBody: chatbody
+            chatBody: {
+                messages: chatbody.messages,
+                channel_id: chatbody.conversationName
+            }
         });
 
 
